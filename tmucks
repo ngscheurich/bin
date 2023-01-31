@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+SESSION="${PWD##*/}"
+LOCAL_CONF=./.tmux.local.conf
+
+session_exists() {
+  tmux list-sessions 2>/dev/null | grep "^$SESSION: "
+}
+
+if session_exists; then
+  echo "Attaching to existing session"
+  tmux attach -t "$SESSION"
+elif [ -e $LOCAL_CONF ]; then
+  echo "Sourcing local conf"
+  tmux new-session -Ads "$SESSION"
+  tmux source-file $LOCAL_CONF
+  tmux attach -t "$SESSION"
+else
+  echo "Starting basic session"
+  tmux new-session -As "$SESSION"
+fi
